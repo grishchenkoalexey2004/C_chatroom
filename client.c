@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <error.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -38,22 +39,31 @@ int input_msg(char msg[]){
     return msg_len;
 }
 
+// ./client.out IP portnum
 int main(int argc,char *argv[]){
     int sock;
     int msg_len;
     int recv_msg_len;
+    int ip_valid;
     unsigned short port_num; 
     struct sockaddr_in addr;
-    
+
     char in_msg_buf[MSG_BUF_SIZE];
     char out_msg_buf[MSG_BUF_SIZE];
     pid_t recv_process_pid;
 
-    if (argc <= 1){
+    if (argc <= 2){
         printf("Not enough arguments\n");
         return 1;
     }
-    port_num = (unsigned short) atoi(argv[1]);
+    ip_valid = inet_aton(argv[1],&(addr.sin_addr));
+    
+    if (!ip_valid){
+        printf("Invalid ip address!\n");
+        exit(1);
+    }
+
+    port_num = (unsigned short) atoi(argv[2]);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0)
@@ -64,7 +74,6 @@ int main(int argc,char *argv[]){
 
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port_num);
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     {
