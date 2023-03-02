@@ -20,7 +20,6 @@ and sends "yes" message after receiving any data from the client*/
 
 typedef struct client_info client_info;
 
-// todo : need dynamicly stored name field
 struct client_info
 {
 	char *name;
@@ -230,7 +229,6 @@ int find_free_struct()
 			return i;
 		}
 	}
-
 	return -1;
 }
 
@@ -332,14 +330,13 @@ void users_cmd(int caller_id)
 void add_private_contact(int user_id, char *username)
 {
 	int k = 0;
-	char **contacts = clients[user_id].contact_arr;
-	while (contacts[k] != NULL)
+	while (clients[user_id].contact_arr[k] != NULL)
 	{
-		if (strcmp(contacts[k], username) == 0)
+		if (strcmp(clients[user_id].contact_arr[k], username) == 0)
 			return;
 		k++;
 	}
-	clients[user_id].contact_arr[k] = malloc((strlen(username) + 1) * sizeof(char));
+	clients[user_id].contact_arr[k] = (char *) malloc((strlen(username) + 1) * sizeof(char));
 	strcpy(clients[user_id].contact_arr[k], username);
 	return;
 }
@@ -374,13 +371,11 @@ void private_cmd(int caller_id){
 void privates_cmd(int caller_id)
 {
 	int k = 0;
-	char **contacts = clients[caller_id].contact_arr;
 	char response_buf[MSG_BUF_SIZE];
 	response_buf[0] = '\0';
 
-	while (contacts[k] != NULL)
-	{
-		strcat(response_buf, contacts[k]);
+	while ((clients[caller_id].contact_arr[k] != NULL) && (k<MAX_CLIENT_NUM)){
+		strcat(response_buf, clients[caller_id].contact_arr[k]);
 		strcat(response_buf, "\n");
 		k++;
 	}
@@ -746,10 +741,10 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < MAX_CLIENT_NUM; i++)
 	{
+		clients[i].is_connected = 0;
 		clients[i].sends_passw = 0;
 		clients[i].name_set = 0;
 		clients[i].status = CLIENT_STATUS;
-		clients[i].is_connected = 0;
 
 		for (int k = 0; k < MAX_CLIENT_NUM; k++)
 		{
