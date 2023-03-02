@@ -477,6 +477,7 @@ void kick_cmd(int caller_id)
 void nick_admin(int caller_id, char *old_username, char *new_username)
 {
 	int subject_id;
+	int same_username_id;
 
 	if (old_username == NULL || new_username == NULL)
 	{
@@ -496,6 +497,13 @@ void nick_admin(int caller_id, char *old_username, char *new_username)
 		return;
 	}
 
+	same_username_id = get_user_id(new_username);
+	
+	if (same_username_id!=-1){
+		send_to_client(caller_id, "THERE IS ALREADY A USER WITH THIS USERNAME! TRY ANOTHER USERNAME!", 0);
+		return;
+	}
+
 	clients[subject_id].name = realloc(clients[subject_id].name, sizeof(char) * (strlen(new_username) + 1));
 	strcpy(clients[subject_id].name, new_username);
 
@@ -505,9 +513,21 @@ void nick_admin(int caller_id, char *old_username, char *new_username)
 }
 
 void nick_user(int caller_id, char *new_username){
+	int same_username_id;
 	if (new_username == NULL)
 	{
 		send_to_client(caller_id, "NOT ENOUGH ARGUMENTS FOR THE COMMAND!", 0);
+		return;
+	}
+
+	if (strcmp(new_username,clients[caller_id].name)==0){
+		send_to_client(caller_id, "YOU ALREADY HAVE THIS USERNAME!", 0);
+		return;
+	}
+
+	same_username_id = get_user_id(new_username);
+	if (same_username_id !=-1){
+		send_to_client(caller_id, "THERE IS ALREADY A USER WITH THIS USERNAME! TRY ANOTHER USERNAME!", 0);
 		return;
 	}
 
