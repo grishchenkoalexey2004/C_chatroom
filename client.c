@@ -44,6 +44,7 @@ int main(int argc,char *argv[]){
     int recv_msg_len;
     unsigned short port_num; 
     struct sockaddr_in addr;
+    
     char in_msg_buf[MSG_BUF_SIZE];
     char out_msg_buf[MSG_BUF_SIZE];
     pid_t recv_process_pid;
