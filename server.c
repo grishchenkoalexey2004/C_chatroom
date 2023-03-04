@@ -96,6 +96,7 @@ void kill_server(int sig)
 			close(clients[i].sock_fd);
 	}
 
+	quit_logging();
 	_exit(0);
 }
 
@@ -738,6 +739,8 @@ void check_client_socks(fd_set *sockets)
 
 			// in case server received normal msg
 			// need to add * before messages
+			
+			message_event(clients[client_index].name,clients[client_index].last_msg);
 			send_all(clients[client_index].last_msg, 1);
 		}
 	}
@@ -781,6 +784,8 @@ int main(int argc, char *argv[])
 	banlist = malloc(sizeof(char *));
 	banlist[0] = NULL;
 
+	init_logging();
+	
 	for (;;)
 	{
 
